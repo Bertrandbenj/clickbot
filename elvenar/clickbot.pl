@@ -55,11 +55,21 @@ while (1){
 		print TOOUTPUT "KeyStrPress Escape \nKeyStrRelease Escape\n";
 		print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
 		print TOOUTPUT "KeyStrPress $3 \nKeyStrRelease $3\n";
+		print TOOUTPUT "KeyStrPress $3 \nKeyStrRelease $3\n";
+		print TOOUTPUT "KeyStrPress $3 \nKeyStrRelease $3\n";
+		print TOOUTPUT "KeyStrPress $3 \nKeyStrRelease $3\n";
+		print TOOUTPUT "KeyStrPress $3 \nKeyStrRelease $3\n";
+	}
+
+	foreach(`grep -1 ButtonPress popul | grep Mot`) {
+		print TOOUTPUT "$_";
+		print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
+		print TOOUTPUT "KeyStrPress Escape \nKeyStrRelease Escape\n";
 	}
 
 	close TOOUTPUT or warn $! ? "Error closing macro pipe: $!" : "Exit status $?";
 
-	`xmacroplay -d 400 < closepage`;
+	`xmacroplay -d 400 < closepage > /dev/null`;
 
 	`sleep $loop; echo page open`;
 }
