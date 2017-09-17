@@ -1,6 +1,6 @@
 # clickbot
 Clickbot for elvenar on linux 
-(the script)[https://github.com/Bertrandbenj/clickbot/blob/master/elvenar/clickbot.pl] fragment the steps to automate clicks on the browser and farm on elvenar
+[the script](https://github.com/Bertrandbenj/clickbot/blob/master/elvenar/clickbot.pl) fragment the steps to automate clicks on the browser and farm on elvenar
 
 
 ## Pre-requisite
