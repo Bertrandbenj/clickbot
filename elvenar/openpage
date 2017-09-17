@@ -1,0 +1,18 @@
+MotionNotify 494 319
+KeyStrPress Super_L
+KeyStrPress ampersand
+KeyStrRelease ampersand
+KeyStrRelease Super_L
+KeyStrPress Control_L
+KeyStrPress n
+KeyStrRelease n
+KeyStrRelease Control_L
+MotionNotify 162 111
+ButtonPress 1
+MotionNotify 162 111
+ButtonRelease 1
+MotionNotify 162 111
+ButtonPress 1
+ButtonRelease 1
+ButtonPress 1
+ButtonRelease 1
