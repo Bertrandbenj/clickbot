@@ -3,73 +3,107 @@
 use strict;
 use Switch;
 
+my $militaryDelay = 60;
+my $populationDelay = 300;
+
+my ($atel, $atelDelay, $manuDelay, $unit) = @ARGV;
+
+my $nextManu = $manuDelay;
+my $nextAtel = $atelDelay;
+my $nextMilitary = $militaryDelay;
+my $nextPopulation = $populationDelay;
+
 # Entry message
-print "clickbot [atelier 1-6] [manufacture time] [caserne 1-5]\n";
-print "usage clickbot 3 0 2\n";
-print "Atelier : $1 \n";
-print "Manufacture : $2\n";
-print "Caserne : $3 \n";
-
-my $loop = 60; # minute in seconds
+print "Usage : clickbot [atelier 1-4] [manufacture time left to wait (min)] [caserne unit type 1-5]\n";
+print "running : clickbot.pl $atel $atelDelay $manuDelay $unit \n";
 
 
-switch ($1) {
-	case 1	{ $loop *= 5}
-	case 2	{ $loop *= 15 }
-	case 3	{ $loop *= 60 }
-	case 4	{ $loop *= 3 * 60 }
-	case 5	{ $loop *= 9 * 60 }
-	case 6	{ $loop *= 24 * 60 }
-	else	{ $loop *= 60 }
+my $loopAtel = 0;
+switch ($atel) {
+	case 1	{ $loopAtel = 5; }
+	case 2	{ $loopAtel = 15; }
+	case 4	{ $loopAtel = 180; }
+	else	{ $loopAtel = 60; }
 }
 
 
+
+
 while (1){
-	`xmacroplay -d 400 < openpage`;
-	`sleep 25; echo page open`;
 
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
 
-	my $output = '';
-	open TOOUTPUT, ' | xmacroplay -d 400' or die "Can't open TOOUTPUT: $!";
+	print "At $hour h $min min  --------------------\n";
+	print "Atelier     - $atel in $nextAtel min \n";
+	print "Manufacture - 180 in $nextManu min\n";
+	print "Caserne     - $unit in $nextMilitary min\n";
+	print "Population  in $nextPopulation min\n";
+	print "\n";
 
+	if( --$nextManu < 0 || --$nextAtel < 0 || --$nextMilitary < 0 || --$nextPopulation < 0){
 
-	foreach(`grep -1 ButtonPress atelier | grep Mot`) {
-		print TOOUTPUT "$_";
-		print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
-		print TOOUTPUT "KeyStrPress Escape \nKeyStrRelease Escape\n";
-		print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
-		print TOOUTPUT "KeyStrPress $1 \nKeyStrRelease $1\n";
+		`xmacroplay -d 500 < openpage > /dev/null`;
+		print "Page opening ... ";
+		`sleep 27`;
+	
+
+		my $output = '';
+		open TOOUTPUT, ' | xmacroplay -d 500' or die "Can't open TOOUTPUT: $!";
+
+	
+		if ($nextAtel < 0){
+			foreach(`grep -1 ButtonPress atelier | grep Mot`) {
+				print TOOUTPUT "$_";
+				print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
+				print TOOUTPUT "KeyStrPress Escape \nKeyStrRelease Escape\n";
+				print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
+				print TOOUTPUT "KeyStrPress $atel \nKeyStrRelease $atel\n";
+			}
+			$nextAtel = $loopAtel;
+			$nextManu--;
+		}
+		
+
+		if($nextManu < 0){
+			foreach(`grep -1 ButtonPress manufacture | grep Mot`) {
+				print TOOUTPUT "$_";
+				print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
+				print TOOUTPUT "KeyStrPress Escape \nKeyStrRelease Escape\n";
+				print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
+				print TOOUTPUT "KeyStrPress 1 \nKeyStrRelease 1\n";
+			}
+			$nextManu = 180;
+		}
+
+		if($nextMilitary < 0){
+			foreach(`grep -1 ButtonPress caserne | grep Mot`) {
+				print TOOUTPUT "$_";
+				print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
+				print TOOUTPUT "KeyStrPress Escape \nKeyStrRelease Escape\n";
+				print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
+				print TOOUTPUT "KeyStrPress $unit \nKeyStrRelease $unit\n";
+				print TOOUTPUT "KeyStrPress $unit \nKeyStrRelease $unit\n";
+				print TOOUTPUT "KeyStrPress $unit \nKeyStrRelease $unit\n";
+				print TOOUTPUT "KeyStrPress $unit \nKeyStrRelease $unit\n";
+				print TOOUTPUT "KeyStrPress $unit \nKeyStrRelease $unit\n";
+			}
+			$nextMilitary = $militaryDelay;
+		}
+
+		if($nextPopulation == 0){
+			foreach(`grep -1 ButtonPress popul | grep Mot`) {
+				print TOOUTPUT "$_";
+				print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
+				print TOOUTPUT "KeyStrPress Escape \nKeyStrRelease Escape\n";
+			}
+			my $nextPopulation = $populationDelay;
+		}
+
+		close TOOUTPUT or warn $! ? "Error closing macro pipe: $!" : "Exit status $?";
+
+		`xmacroplay -d 400 < closepage > /dev/null`;
+
 	}
-
-	foreach(`grep -1 ButtonPress manufacture | grep Mot`) {
-		print TOOUTPUT "$_";
-		print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
-		print TOOUTPUT "KeyStrPress Escape \nKeyStrRelease Escape\n";
-		print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
-		print TOOUTPUT "KeyStrPress 1 \nKeyStrRelease 1\n";
-	}
-
-	foreach(`grep -1 ButtonPress caserne | grep Mot`) {
-		print TOOUTPUT "$_";
-		print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
-		print TOOUTPUT "KeyStrPress Escape \nKeyStrRelease Escape\n";
-		print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
-		print TOOUTPUT "KeyStrPress $3 \nKeyStrRelease $3\n";
-		print TOOUTPUT "KeyStrPress $3 \nKeyStrRelease $3\n";
-		print TOOUTPUT "KeyStrPress $3 \nKeyStrRelease $3\n";
-		print TOOUTPUT "KeyStrPress $3 \nKeyStrRelease $3\n";
-		print TOOUTPUT "KeyStrPress $3 \nKeyStrRelease $3\n";
-	}
-
-	foreach(`grep -1 ButtonPress popul | grep Mot`) {
-		print TOOUTPUT "$_";
-		print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
-		print TOOUTPUT "KeyStrPress Escape \nKeyStrRelease Escape\n";
-	}
-
-	close TOOUTPUT or warn $! ? "Error closing macro pipe: $!" : "Exit status $?";
-
-	`xmacroplay -d 400 < closepage > /dev/null`;
-
-	`sleep $loop; echo page open`;
+	
+	`sleep 60`;
 }
