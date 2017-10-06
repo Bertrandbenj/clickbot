@@ -10,7 +10,7 @@ my ($atel, $atelDelay, $manuDelay, $unit) = @ARGV;
 
 my $nextManu = $manuDelay;
 my $nextAtel = $atelDelay;
-my $nextMilitary = $militaryDelay;
+my $nextMilitary = $atelDelay;
 my $nextPopulation = $populationDelay;
 
 # Entry message
@@ -33,25 +33,22 @@ while (1){
 
 	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
 
-	print "At $hour h $min min  --------------------\n";
-	print "Atelier     - $atel in $nextAtel min \n";
-	print "Manufacture - 180 in $nextManu min\n";
-	print "Caserne     - $unit in $nextMilitary min\n";
-	print "Population  in $nextPopulation min\n";
-	print "\n";
+	print "$hour:$min ---- Atelier: $nextAtel -- Manuf: $nextManu -- Caserne: $nextMilitary -- Pop: $nextPopulation \n";
+	
 
-	if( --$nextManu < 0 || --$nextAtel < 0 || --$nextMilitary < 0 || --$nextPopulation < 0){
-
+	if( $nextManu <= 0 || $nextAtel <= 0 || $nextMilitary <= 0 || $nextPopulation <= 0){
+	
+		print "Page opening ... \n";
 		`xmacroplay -d 500 < openpage > /dev/null`;
-		print "Page opening ... ";
 		`sleep 27`;
 	
 
-		my $output = '';
-		open TOOUTPUT, ' | xmacroplay -d 500' or die "Can't open TOOUTPUT: $!";
+		my $output = 'KeyStrPress Escape \nKeyStrRelease Escape\n';
+		open TOOUTPUT, ' | xmacroplay -d 500 > /dev/null' or die "Can't open TOOUTPUT: $!";
 
 	
-		if ($nextAtel < 0){
+		if ($nextAtel <= 0){
+			print "Ateliers ... \n";
 			foreach(`grep -1 ButtonPress atelier | grep Mot`) {
 				print TOOUTPUT "$_";
 				print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
@@ -60,11 +57,11 @@ while (1){
 				print TOOUTPUT "KeyStrPress $atel \nKeyStrRelease $atel\n";
 			}
 			$nextAtel = $loopAtel;
-			$nextManu--;
 		}
 		
 
-		if($nextManu < 0){
+		if($nextManu <= 0){
+			print "Manufactures ... \n";
 			foreach(`grep -1 ButtonPress manufacture | grep Mot`) {
 				print TOOUTPUT "$_";
 				print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
@@ -75,7 +72,8 @@ while (1){
 			$nextManu = 180;
 		}
 
-		if($nextMilitary < 0){
+		if($nextMilitary <= 0){
+			print "Military ... \n";
 			foreach(`grep -1 ButtonPress caserne | grep Mot`) {
 				print TOOUTPUT "$_";
 				print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
@@ -90,20 +88,22 @@ while (1){
 			$nextMilitary = $militaryDelay;
 		}
 
-		if($nextPopulation == 0){
+		if($nextPopulation <= 0){
+			print "Population ... \n";
 			foreach(`grep -1 ButtonPress popul | grep Mot`) {
 				print TOOUTPUT "$_";
 				print TOOUTPUT "ButtonPress 1 \nButtonRelease 1\n";
 				print TOOUTPUT "KeyStrPress Escape \nKeyStrRelease Escape\n";
 			}
-			my $nextPopulation = $populationDelay;
+			$nextPopulation = $populationDelay;
 		}
 
+		print "Close macro ... \n";
 		close TOOUTPUT or warn $! ? "Error closing macro pipe: $!" : "Exit status $?";
-
+		print "Close page ... \n";
 		`xmacroplay -d 400 < closepage > /dev/null`;
 
 	}
-	
+	$nextManu--; $nextAtel--; $nextMilitary--; $nextPopulation--;
 	`sleep 60`;
 }
