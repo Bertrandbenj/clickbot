@@ -1,3 +1,4 @@
-MotionNotify 240 38
-ButtonPress 1
-ButtonRelease 1
+KeyStrPress Control_L
+KeyStrPress w
+KeyStrRelease w
+KeyStrRelease Control_L
